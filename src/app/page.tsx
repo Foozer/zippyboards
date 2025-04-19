@@ -83,18 +83,151 @@ export default function Home() {
       </section>
 
       <section className="bg-gray-800 py-20 px-6">
-        <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-10 text-center">
-          <div>
-            <h3 className="text-xl font-bold mb-3">⚡ Blazing Fast</h3>
-            <p>Built for speed with keyboard shortcuts and instant load times.</p>
+        <div className="max-w-5xl mx-auto">
+          <h2 className="text-3xl font-bold mb-12 text-center">Built for Developer Workflow</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 text-center">
+            <div>
+              <h3 className="text-xl font-bold mb-3">⚡ Blazing Fast</h3>
+              <p>Server-side rendering and edge caching for instant load times. No more waiting around.</p>
+            </div>
+            <div>
+              <h3 className="text-xl font-bold mb-3">⌨️ Keyboard First</h3>
+              <p>Command palette navigation and keyboard shortcuts. Keep your hands on the keyboard.</p>
+            </div>
+            <div>
+              <h3 className="text-xl font-bold mb-3">🔄 GitHub Sync</h3>
+              <p>Seamless integration with GitHub. Keep your issues in sync automatically.</p>
+            </div>
           </div>
-          <div>
-            <h3 className="text-xl font-bold mb-3">⌨️ Keyboard First</h3>
-            <p>Complete tasks without touching your mouse. Built for power users.</p>
+        </div>
+      </section>
+
+      <section className="py-20 px-6">
+        <div className="max-w-5xl mx-auto">
+          <h2 className="text-3xl font-bold mb-12 text-center">Future Pricing Plans</h2>
+          <p className="text-center text-gray-400 mb-12 max-w-2xl mx-auto">
+            We're currently in early access. Join our waitlist to be the first to know when we launch our pricing plans.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Free Tier */}
+            <div className="bg-gray-800 rounded-lg p-8 border border-gray-700">
+              <h3 className="text-2xl font-bold mb-4">Free</h3>
+              <p className="text-4xl font-bold mb-6">$0<span className="text-lg text-gray-400">/mo</span></p>
+              <ul className="space-y-4 mb-8">
+                <li className="flex items-center">
+                  <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                  </svg>
+                  1 Project
+                </li>
+                <li className="flex items-center">
+                  <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                  </svg>
+                  Up to 3 Users
+                </li>
+                <li className="flex items-center">
+                  <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                  </svg>
+                  Basic Features
+                </li>
+              </ul>
+              <button className="w-full bg-gray-700 hover:bg-gray-600 text-white py-2 rounded opacity-50 cursor-not-allowed">
+                Coming Soon
+              </button>
+            </div>
+
+            {/* Pro Tier */}
+            <div className="bg-gray-800 rounded-lg p-8 border-2 border-blue-500 relative">
+              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                <span className="bg-blue-500 text-white text-sm px-3 py-1 rounded-full">Popular</span>
+              </div>
+              <h3 className="text-2xl font-bold mb-4">Pro</h3>
+              <p className="text-4xl font-bold mb-6">$9<span className="text-lg text-gray-400">/user/mo</span></p>
+              <ul className="space-y-4 mb-8">
+                <li className="flex items-center">
+                  <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                  </svg>
+                  Unlimited Projects
+                </li>
+                <li className="flex items-center">
+                  <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                  </svg>
+                  GitHub Sync
+                </li>
+                <li className="flex items-center">
+                  <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                  </svg>
+                  Dark Mode
+                </li>
+                <li className="flex items-center">
+                  <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                  </svg>
+                  AI Assist
+                </li>
+              </ul>
+              <button className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded opacity-50 cursor-not-allowed">
+                Coming Soon
+              </button>
+            </div>
+
+            {/* Team Tier */}
+            <div className="bg-gray-800 rounded-lg p-8 border border-gray-700">
+              <h3 className="text-2xl font-bold mb-4">Team</h3>
+              <p className="text-4xl font-bold mb-6">$29<span className="text-lg text-gray-400">/mo</span></p>
+              <ul className="space-y-4 mb-8">
+                <li className="flex items-center">
+                  <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                  </svg>
+                  Up to 10 Users
+                </li>
+                <li className="flex items-center">
+                  <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                  </svg>
+                  API Access
+                </li>
+                <li className="flex items-center">
+                  <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                  </svg>
+                  Slack Integration
+                </li>
+              </ul>
+              <button className="w-full bg-gray-700 hover:bg-gray-600 text-white py-2 rounded opacity-50 cursor-not-allowed">
+                Coming Soon
+              </button>
+            </div>
           </div>
-          <div>
-            <h3 className="text-xl font-bold mb-3">🤖 AI Assisted</h3>
-            <p>Smart task suggestions and automated workflows powered by AI.</p>
+        </div>
+      </section>
+
+      <section className="py-20 px-6">
+        <div className="max-w-5xl mx-auto">
+          <h2 className="text-3xl font-bold mb-12 text-center">Modern Tech Stack</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+            <div className="p-4 bg-gray-800 rounded-lg">
+              <h3 className="font-semibold mb-2">Next.js</h3>
+              <p className="text-sm text-gray-400">App Router</p>
+            </div>
+            <div className="p-4 bg-gray-800 rounded-lg">
+              <h3 className="font-semibold mb-2">Supabase</h3>
+              <p className="text-sm text-gray-400">PostgreSQL + Auth</p>
+            </div>
+            <div className="p-4 bg-gray-800 rounded-lg">
+              <h3 className="font-semibold mb-2">Tailwind CSS</h3>
+              <p className="text-sm text-gray-400">Utility-first styling</p>
+            </div>
+            <div className="p-4 bg-gray-800 rounded-lg">
+              <h3 className="font-semibold mb-2">Vercel</h3>
+              <p className="text-sm text-gray-400">Edge deployment</p>
+            </div>
           </div>
         </div>
       </section>
