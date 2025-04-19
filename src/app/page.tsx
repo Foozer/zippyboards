@@ -106,7 +106,7 @@ export default function Home() {
         <div className="max-w-5xl mx-auto">
           <h2 className="text-3xl font-bold mb-12 text-center">Future Pricing Plans</h2>
           <p className="text-center text-gray-400 mb-12 max-w-2xl mx-auto">
-            We're currently in early access. Join our waitlist to be the first to know when we launch our pricing plans.
+            We&apos;re currently in early access. Join our waitlist to be the first to know when we launch our pricing plans.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Free Tier */}
