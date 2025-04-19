@@ -55,7 +55,7 @@ export default function Home() {
           Blazing Fast Task Management for Devs
         </h2>
         <p className="text-lg md:text-xl mb-10 max-w-2xl mx-auto">
-          ZippyBoards is a keyboard-first, developer-focused issue tracker that stays out of your way.
+          ZippyBoards is a keyboard-first, developer-focused issue tracker that stays out of your way!
         </p>
         <form onSubmit={handleSubmit} className="max-w-md mx-auto">
           <div className="flex gap-2">
