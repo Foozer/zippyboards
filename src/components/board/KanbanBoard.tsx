@@ -37,6 +37,25 @@ export default function KanbanBoard() {
     }
   ])
 
+  const handleAddTask = (columnId: string) => {
+    const newTask: Task = {
+      id: Date.now().toString(),
+      title: 'New Task',
+      description: '',
+      status: columnId as Task['status'],
+      priority: 'medium',
+      labels: []
+    }
+
+    setColumns(prevColumns => 
+      prevColumns.map(column => 
+        column.id === columnId
+          ? { ...column, tasks: [...column.tasks, newTask] }
+          : column
+      )
+    )
+  }
+
   return (
     <div className="flex gap-4 p-4 h-[calc(100vh-4rem)] overflow-x-auto">
       {columns.map((column) => (
@@ -67,9 +86,7 @@ export default function KanbanBoard() {
           </div>
           <button
             className="mt-4 p-2 bg-gray-700 hover:bg-gray-600 rounded text-sm"
-            onClick={() => {
-              // TODO: Implement task creation
-            }}
+            onClick={() => handleAddTask(column.id)}
           >
             + Add Task
           </button>
