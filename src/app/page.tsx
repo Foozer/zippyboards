@@ -45,8 +45,8 @@ export default function Home() {
     <main>
       <header className="p-6 flex justify-between items-center border-b border-gray-700">
         <h1 className="text-2xl font-bold">ZippyBoards</h1>
-        <a href="#waitlist" className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded">
-          Join Waitlist
+        <a href="/app" className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded">
+          Try Demo
         </a>
       </header>
 
