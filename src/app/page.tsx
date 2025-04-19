@@ -77,7 +77,7 @@ export default function Home() {
           </div>
           {error && <p className="text-red-500 mt-2">{error}</p>}
           {isSuccess && (
-            <p className="text-green-500 mt-2">Thanks for joining! We'll be in touch soon.</p>
+            <p className="text-green-500 mt-2">Thanks for joining! We&apos;ll be in touch soon.</p>
           )}
         </form>
       </section>
