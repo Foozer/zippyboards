@@ -4,7 +4,11 @@ import { useState } from 'react'
 import { supabase } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 
-export default function CreateProjectForm() {
+interface CreateProjectFormProps {
+  onSuccess?: () => void
+}
+
+export default function CreateProjectForm({ onSuccess }: CreateProjectFormProps) {
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -17,30 +21,55 @@ export default function CreateProjectForm() {
     setError(null)
 
     try {
-      // Directly call the single RPC function to create project and add owner
-      const { data: newProjectId, error: rpcError } = await supabase.rpc('create_project_and_add_owner', {
-        project_name: name,
-        project_description: description || null // Pass null if empty
-      })
-
-      if (rpcError) {
-        console.error("Error calling create_project_and_add_owner RPC:", rpcError)
-        // Attempt to provide a more specific error message if possible
-        let errorMessage = `Failed to create project via RPC: ${rpcError.message}`
-        if (rpcError.details) errorMessage += ` Details: ${rpcError.details}`
-        if (rpcError.hint) errorMessage += ` Hint: ${rpcError.hint}`
-        throw new Error(errorMessage)
+      const { data: { user } } = await supabase.auth.getUser()
+      
+      if (!user) {
+        throw new Error('You must be logged in to create a project')
       }
 
-      if (!newProjectId) {
-        throw new Error("RPC function did not return a project ID.")
+      // Insert the project
+      const { data: project, error: projectError } = await supabase
+        .from('projects')
+        .insert([
+          { 
+            name,
+            description,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          }
+        ])
+        .select()
+        .single()
+
+      if (projectError) throw projectError
+
+      if (!project) {
+        throw new Error('Failed to create project')
       }
 
-      router.push(`/projects/${newProjectId}`) // Use the ID returned from RPC
+      // Add the creator as a project member with owner role
+      const { error: memberError } = await supabase
+        .from('project_members')
+        .insert([
+          {
+            project_id: project.id,
+            user_id: user.id,
+            role: 'owner',
+            created_at: new Date().toISOString()
+          }
+        ])
+
+      if (memberError) throw memberError
+
+      // Reset form
+      setName('')
+      setDescription('')
+      onSuccess?.()
+
+      router.push(`/projects/${project.id}`)
     } catch (err) {
-      console.error('Error during project creation RPC:', err)
-      // Display the detailed error message from the catch block
-      setError(err instanceof Error ? err.message : `Operation failed: ${JSON.stringify(err)}`)
+      console.error('Error creating project:', err)
+      setError(err instanceof Error ? err.message : 'Failed to create project')
     } finally {
       setIsLoading(false)
     }
