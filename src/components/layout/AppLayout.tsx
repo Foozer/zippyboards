@@ -51,7 +51,7 @@ export default function AppLayout({
 
   return (
     <div className="flex h-screen bg-gray-900 text-white">
-      <Navigation />
+      <Navigation user={user} />
       <main className="flex-1 overflow-auto">
         {children}
       </main>

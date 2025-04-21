@@ -2,15 +2,32 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useRouter } from 'next/navigation'
+import { supabase } from '@/lib/supabase/client'
+import type { User } from '@supabase/supabase-js'
 
-export default function Navigation() {
+interface NavigationProps {
+  user: User | null
+}
+
+export default function Navigation({ user }: NavigationProps) {
   const pathname = usePathname()
+  const router = useRouter()
 
   const isActive = (path: string) => {
     if (path === '/dashboard') {
       return pathname === '/dashboard'
     }
     return pathname.startsWith(path)
+  }
+
+  const handleSignOut = async () => {
+    try {
+      await supabase.auth.signOut()
+      router.push('/login')
+    } catch (error) {
+      console.error('Error signing out:', error)
+    }
   }
 
   return (
@@ -69,7 +86,24 @@ export default function Navigation() {
           </li>
         </ul>
 
-        {/* User info and sign out will be added here */}
+        {/* User info and sign out */}
+        <div className="pt-4 border-t border-gray-700">
+          {user && (
+            <div className="mb-4 text-sm">
+              <div className="text-gray-400">Signed in as:</div>
+              <div className="truncate text-gray-300">{user.email}</div>
+            </div>
+          )}
+          <button
+            onClick={handleSignOut}
+            className="flex items-center gap-2 w-full p-2 rounded hover:bg-red-600/20 text-red-400 hover:text-red-300 transition-colors"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+            Sign Out
+          </button>
+        </div>
       </nav>
     </aside>
   )

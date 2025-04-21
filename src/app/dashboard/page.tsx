@@ -135,7 +135,7 @@ export default function DashboardPage() {
           <div className="bg-gray-800 rounded-lg p-6">
             <h2 className="text-xl font-semibold mb-4">Recent Activity</h2>
             <p className="text-gray-400">
-              Activity feed coming soon! Track your team's progress and stay updated on project changes.
+              Activity feed coming soon! Track your team&apos;s progress and stay updated on project changes.
             </p>
           </div>
         </div>
