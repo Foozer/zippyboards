@@ -11,7 +11,7 @@ function LoginForm() {
   const error = searchParams.get('error')
   const message = searchParams.get('message')
   const [loading, setLoading] = useState(false)
-  const redirectTo = searchParams.get('redirectTo') || searchParams.get('redirectedFrom') || '/app'
+  const redirectTo = searchParams.get('redirectTo') || searchParams.get('redirectedFrom') || '/dashboard'
 
   const handleSubmit = async (formData: FormData) => {
     setLoading(true)
