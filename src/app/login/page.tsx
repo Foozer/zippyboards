@@ -1,11 +1,11 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
+import { useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { login } from './actions'
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const error = searchParams.get('error')
@@ -51,59 +51,62 @@ export default function LoginPage() {
             {message}
           </div>
         )}
-
-        <form 
-          action={handleSubmit}
-          className="space-y-4"
-        >
+        
+        <form action={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="email" className="block mb-1 text-sm font-medium text-gray-200">
+            <label htmlFor="email" className="block text-sm font-medium mb-1">
               Email
             </label>
             <input
+              type="email"
               id="email"
               name="email"
-              type="email"
               required
-              className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
-              placeholder="you@example.com"
+              className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
-
+          
           <div>
-            <label htmlFor="password" className="block mb-1 text-sm font-medium text-gray-200">
+            <label htmlFor="password" className="block text-sm font-medium mb-1">
               Password
             </label>
             <input
+              type="password"
               id="password"
               name="password"
-              type="password"
               required
-              className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
-              placeholder="••••••••"
+              className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
-
+          
           <button
             type="submit"
             disabled={loading}
-            className={`w-full py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 ${
-              loading ? 'opacity-70 cursor-not-allowed' : ''
-            }`}
+            className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 rounded text-white font-medium transition disabled:opacity-50"
           >
-            {loading ? 'Logging in...' : 'Login'}
+            {loading ? 'Signing in...' : 'Sign in'}
           </button>
         </form>
-
-        <div className="mt-4 text-center">
-          <p className="text-sm text-gray-400">
-            Don&apos;t have an account?{' '}
-            <Link href="/signup" className="text-blue-400 hover:underline">
-              Sign up
-            </Link>
-          </p>
+        
+        <div className="mt-4 text-center text-sm">
+          <span className="text-gray-400">Don&apos;t have an account? </span>
+          <Link href="/signup" className="text-blue-400 hover:text-blue-300">
+            Sign up
+          </Link>
         </div>
       </div>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+      </div>
+    }>
+      <LoginForm />
+    </Suspense>
   )
 } 
