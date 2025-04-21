@@ -1,1 +1,1 @@
-#!/usr/bin/env sh\n. "$(dirname -- "$0")/_/husky.sh"\n\nnpm run lint
+#!/usr/bin/env sh\n. "$(dirname -- "$0")/_/husky.sh"\n\necho "🔍 Checking types..."\nnpx tsc --noEmit || exit 1\n\necho "💅 Formatting and linting files..."\nnpx lint-staged
