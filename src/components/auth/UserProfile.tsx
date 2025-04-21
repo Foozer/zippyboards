@@ -9,7 +9,6 @@ export default function UserProfile() {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [message, setMessage] = useState('')
   const router = useRouter()
 
   useEffect(() => {
@@ -86,12 +85,6 @@ export default function UserProfile() {
             {new Date(user.created_at).toLocaleDateString()}
           </div>
         </div>
-
-        {message && (
-          <div className="mb-4 p-3 bg-green-900 text-green-300 rounded">
-            {message}
-          </div>
-        )}
 
         <div className="flex justify-end">
           <button

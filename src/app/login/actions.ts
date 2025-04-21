@@ -62,8 +62,7 @@ export async function signup(formData: FormData) {
       return { error: error.message }
     }
     
-    // Return success instead of redirecting
-    return { success: true, message: 'Check your email to confirm your account' }
+    return { success: true }
   } catch (err) {
     console.error('Server signup error:', err)
     return { error: 'An error occurred during signup' }
