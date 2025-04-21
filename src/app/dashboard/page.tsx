@@ -9,13 +9,7 @@ import { Database } from '@/types/database'
 
 type Project = Database['public']['Tables']['projects']['Row']
 
-type ProjectMemberResponse = {
-  project_id: string
-  projects: Project
-}
-
 export default function DashboardPage() {
-  const [user, setUser] = useState<User | null>(null)
   const [projects, setProjects] = useState<Project[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [showCreateForm, setShowCreateForm] = useState(false)
@@ -27,7 +21,6 @@ export default function DashboardPage() {
       setError(null); // Clear previous errors
       try {
         const { data: { user } } = await supabase.auth.getUser();
-        setUser(user);
 
         if (user) {
           // Fetch project IDs the user is a member of using a direct query

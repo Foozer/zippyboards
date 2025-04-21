@@ -5,7 +5,6 @@ import { supabase } from '@/lib/supabase/client'
 import { Database } from '@/types/database'
 
 type Project = Database['public']['Tables']['projects']['Row']
-type User = Database['public']['Tables']['users']['Row']
 
 interface ProjectMember {
   user_id: string
@@ -15,6 +14,19 @@ interface ProjectMember {
 
 interface ProjectSettingsProps {
   project: Project
+}
+
+interface ProjectMemberData {
+  user_id: string
+  role: string
+  email: string
+}
+
+interface ErrorDetails {
+  message?: string
+  details?: string
+  hint?: string
+  code?: string
 }
 
 export default function ProjectSettings({ project }: ProjectSettingsProps) {
@@ -64,17 +76,17 @@ export default function ProjectSettings({ project }: ProjectSettingsProps) {
           console.error('Error keys:', Object.keys(error))
           if (error && typeof error === 'object') {
             console.error('Error details:', {
-              message: (error as any).message,
-              details: (error as any).details,
-              hint: (error as any).hint,
-              code: (error as any).code,
+              message: (error as ErrorDetails).message,
+              details: (error as ErrorDetails).details,
+              hint: (error as ErrorDetails).hint,
+              code: (error as ErrorDetails).code,
               fullError: JSON.stringify(error)
             })
           }
           throw error
         }
 
-        const formattedMembers = data?.map((member: any) => ({
+        const formattedMembers = data?.map((member: ProjectMemberData) => ({
           user_id: member.user_id,
           role: member.role,
           users: { email: member.email }
@@ -85,10 +97,10 @@ export default function ProjectSettings({ project }: ProjectSettingsProps) {
         console.error('Error fetching members:', err)
         if (err && typeof err === 'object') {
           console.error('Error details:', {
-            message: (err as any).message,
-            details: (err as any).details,
-            hint: (err as any).hint,
-            code: (err as any).code,
+            message: (err as ErrorDetails).message,
+            details: (err as ErrorDetails).details,
+            hint: (err as ErrorDetails).hint,
+            code: (err as ErrorDetails).code,
             fullError: JSON.stringify(err)
           })
         }
@@ -99,7 +111,7 @@ export default function ProjectSettings({ project }: ProjectSettingsProps) {
     }
 
     fetchMembers()
-  }, [project.id])
+  }, [project.id, project])
 
   const handleAddMember = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -139,7 +151,7 @@ export default function ProjectSettings({ project }: ProjectSettingsProps) {
         throw fetchError
       }
 
-      const formattedUpdatedMembers = updatedMembersData?.map((member: any) => ({
+      const formattedUpdatedMembers = updatedMembersData?.map((member: ProjectMemberData) => ({
         user_id: member.user_id,
         role: member.role,
         users: { email: member.email }
