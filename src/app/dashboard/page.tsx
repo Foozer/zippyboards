@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase/client'
-import type { User } from '@supabase/supabase-js'
 import CreateProjectForm from '@/components/projects/CreateProjectForm'
 import Link from 'next/link'
 import { Database } from '@/types/database'
