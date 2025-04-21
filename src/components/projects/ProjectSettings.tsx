@@ -10,13 +10,7 @@ type User = Database['public']['Tables']['users']['Row']
 interface ProjectMember {
   user_id: string
   role: 'owner' | 'member'
-  users: User
-}
-
-type ProjectMemberResponse = {
-  user_id: string
-  role: 'owner' | 'member'
-  users: User
+  users: { email?: string | null }
 }
 
 interface ProjectSettingsProps {
@@ -29,28 +23,76 @@ export default function ProjectSettings({ project }: ProjectSettingsProps) {
   const [error, setError] = useState<string | null>(null)
   const [newMemberEmail, setNewMemberEmail] = useState('')
   const [isAddingMember, setIsAddingMember] = useState(false)
+  const [currentUser, setCurrentUser] = useState<{ id: string } | null>(null)
 
   useEffect(() => {
-    const fetchMembers = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('project_members')
-          .select(`
-            user_id,
-            role,
-            users:users (
-              id,
-              email,
-              created_at,
-              updated_at
-            )
-          `)
-          .eq('project_id', project.id)
+    // Get the current user first
+    const getCurrentUser = async () => {
+      const { data: { user }, error } = await supabase.auth.getUser()
+      if (error) throw error
+      if (!user) throw new Error('No authenticated user')
+      setCurrentUser(user)
+      return user
+    }
 
-        if (error) throw error
-        setMembers(data as unknown as ProjectMember[])
+    const fetchMembers = async () => {
+      setIsLoading(true)
+      setError(null)
+      try {
+        const user = await getCurrentUser()
+        
+        // Add detailed logging
+        console.log('Attempting to fetch members with:', {
+          projectId: project.id,
+          userId: user.id,
+          project: project,
+          user: user
+        });
+        
+        const { data, error } = await supabase.rpc('get_project_members_if_allowed', {
+          p_project_id: project.id,
+          p_user_id: user.id
+        })
+
+        // Log the raw response
+        console.log('Raw RPC response:', { data, error });
+
+        if (error) {
+          console.error("Error calling get_project_members_if_allowed RPC:", error)
+          // Try to log the error in different ways
+          console.error('Error stringified:', JSON.stringify(error))
+          console.error('Error keys:', Object.keys(error))
+          if (error && typeof error === 'object') {
+            console.error('Error details:', {
+              message: (error as any).message,
+              details: (error as any).details,
+              hint: (error as any).hint,
+              code: (error as any).code,
+              fullError: JSON.stringify(error)
+            })
+          }
+          throw error
+        }
+
+        const formattedMembers = data?.map((member: any) => ({
+          user_id: member.user_id,
+          role: member.role,
+          users: { email: member.email }
+        })) || []
+
+        setMembers(formattedMembers)
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to fetch members')
+        console.error('Error fetching members:', err)
+        if (err && typeof err === 'object') {
+          console.error('Error details:', {
+            message: (err as any).message,
+            details: (err as any).details,
+            hint: (err as any).hint,
+            code: (err as any).code,
+            fullError: JSON.stringify(err)
+          })
+        }
+        setError(err instanceof Error ? err.message : 'Failed to fetch members - check console for details')
       } finally {
         setIsLoading(false)
       }
@@ -65,7 +107,8 @@ export default function ProjectSettings({ project }: ProjectSettingsProps) {
     setError(null)
 
     try {
-      // First, find the user by email
+      if (!currentUser) throw new Error('No authenticated user')
+
       const { data: userData, error: userError } = await supabase
         .from('users')
         .select('id')
@@ -75,7 +118,6 @@ export default function ProjectSettings({ project }: ProjectSettingsProps) {
       if (userError) throw userError
       if (!userData) throw new Error('User not found')
 
-      // Add the user as a project member
       const { error: memberError } = await supabase
         .from('project_members')
         .insert({
@@ -86,23 +128,24 @@ export default function ProjectSettings({ project }: ProjectSettingsProps) {
 
       if (memberError) throw memberError
 
-      // Refresh members list
-      const { data: updatedMembers, error: fetchError } = await supabase
-        .from('project_members')
-        .select(`
-          user_id,
-          role,
-          users:users (
-            id,
-            email,
-            created_at,
-            updated_at
-          )
-        `)
-        .eq('project_id', project.id)
+      // Refresh members list using RPC with current user ID
+      const { data: updatedMembersData, error: fetchError } = await supabase.rpc('get_project_members_if_allowed', {
+        p_project_id: project.id,
+        p_user_id: currentUser.id
+      })
 
-      if (fetchError) throw fetchError
-      setMembers(updatedMembers as unknown as ProjectMember[])
+      if (fetchError) {
+        console.error("Error refreshing members via RPC:", fetchError)
+        throw fetchError
+      }
+
+      const formattedUpdatedMembers = updatedMembersData?.map((member: any) => ({
+        user_id: member.user_id,
+        role: member.role,
+        users: { email: member.email }
+      })) || []
+
+      setMembers(formattedUpdatedMembers)
       setNewMemberEmail('')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to add member')
@@ -187,7 +230,7 @@ export default function ProjectSettings({ project }: ProjectSettingsProps) {
                 className="flex items-center justify-between p-2 bg-gray-700 rounded-md"
               >
                 <div>
-                  <p className="text-gray-100">{member.users.email}</p>
+                  <p className="text-gray-100">{member.users?.email || 'N/A'}</p>
                   <p className="text-sm text-gray-400">{member.role}</p>
                 </div>
                 {member.role !== 'owner' && (

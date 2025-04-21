@@ -205,10 +205,11 @@ CREATE POLICY "Project members can manage labels" -- Consider splitting to owner
 -- Project members policies (Final Version - NO INSERT policy)
 DROP POLICY IF EXISTS "Project creators can insert initial owner" ON public.project_members;
 DROP POLICY IF EXISTS "Project members can view project members" ON public.project_members;
+DROP POLICY IF EXISTS "Users can view their own membership entries" ON public.project_members;
 DROP POLICY IF EXISTS "Project owners can update project members" ON public.project_members;
 DROP POLICY IF EXISTS "Project owners can delete project members" ON public.project_members;
 
--- Use IN clause to potentially avoid recursion detected with EXISTS
+-- Re-instate the IN clause policy: Allow users to view all members of projects they are part of.
 -- CREATE POLICY "Project members can view project members"
 --    ON public.project_members FOR SELECT
 --    USING (
@@ -220,10 +221,10 @@ DROP POLICY IF EXISTS "Project owners can delete project members" ON public.proj
 --    );
 
 -- Simpler policy: Allow users to select their own membership entries directly.
--- This avoids self-referencing subqueries in the policy itself.
+-- This avoids self-referencing subqueries in the policy itself and works for the dashboard.
 CREATE POLICY "Users can view their own membership entries"
-    ON public.project_members FOR SELECT
-    USING ( auth.uid() = user_id );
+   ON public.project_members FOR SELECT
+   USING ( auth.uid() = user_id );
 
 CREATE POLICY "Project owners can update project members"
     ON public.project_members FOR UPDATE
@@ -307,4 +308,76 @@ DROP TRIGGER IF EXISTS update_github_sync_updated_at ON public.github_sync;
 CREATE TRIGGER update_github_sync_updated_at
     BEFORE UPDATE ON public.github_sync
     FOR EACH ROW
-    EXECUTE FUNCTION update_updated_at_column(); 
+    EXECUTE FUNCTION update_updated_at_column();
+
+-- Function to get project members, checking membership first
+DROP FUNCTION IF EXISTS public.get_project_members_if_allowed(UUID, UUID);
+CREATE OR REPLACE FUNCTION public.get_project_members_if_allowed(p_project_id UUID, p_user_id UUID)
+RETURNS TABLE (
+    user_id UUID,
+    role VARCHAR(20),
+    email VARCHAR(255)  -- Changed from TEXT to VARCHAR(255) to match auth.users.email type
+)
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+    v_debug text;
+BEGIN
+    -- Log input parameters
+    v_debug := format('Function called with project_id: %s, user_id: %s', p_project_id::text, p_user_id::text);
+    RAISE NOTICE '%', v_debug;
+    
+    -- Validate inputs
+    IF p_project_id IS NULL THEN
+        RAISE EXCEPTION 'project_id cannot be null';
+    END IF;
+    
+    IF p_user_id IS NULL THEN
+        RAISE EXCEPTION 'user_id cannot be null';
+    END IF;
+
+    -- First, check if the project exists
+    IF NOT EXISTS (SELECT 1 FROM public.projects WHERE id = p_project_id) THEN
+        RAISE EXCEPTION 'Project not found';
+    END IF;
+
+    -- Check if the calling user is a member of the project
+    IF EXISTS (
+        SELECT 1
+        FROM public.project_members pm
+        WHERE pm.project_id = p_project_id 
+        AND pm.user_id = p_user_id
+    ) THEN
+        -- Log successful membership check
+        RAISE NOTICE 'User % is a member of project %', p_user_id, p_project_id;
+        
+        -- If they are a member, return all members with their emails
+        RETURN QUERY
+        SELECT
+            pm.user_id,
+            pm.role,
+            u.email::VARCHAR(255)  -- Explicit cast to VARCHAR(255)
+        FROM public.project_members pm
+        JOIN auth.users u ON pm.user_id = u.id
+        WHERE pm.project_id = p_project_id;
+        
+        -- Log query execution
+        GET DIAGNOSTICS v_debug = ROW_COUNT;
+        RAISE NOTICE 'Returned % rows', v_debug;
+    ELSE
+        -- Log failed membership check
+        RAISE NOTICE 'User % is NOT a member of project %', p_user_id, p_project_id;
+        RETURN;
+    END IF;
+EXCEPTION
+    WHEN OTHERS THEN
+        -- Log any errors
+        RAISE NOTICE 'Error in get_project_members_if_allowed: %', SQLERRM;
+        RAISE;
+END;
+$$;
+
+-- Grant execute permission to authenticated users
+GRANT EXECUTE ON FUNCTION public.get_project_members_if_allowed(UUID, UUID) TO authenticated; 
