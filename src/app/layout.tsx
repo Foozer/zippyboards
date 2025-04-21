@@ -13,6 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'),
   title: "ZippyBoard - Speed-run Issue Tracker",
   description: "The speed-run issue tracker for indie devs and lean teams. Lightning fast, GitHub integrated, and AI-powered task management.",
   keywords: ["issue tracker", "project management", "kanban", "github integration", "ai", "task management"],

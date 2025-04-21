@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "prepare": "husky install"
+    "postinstall": "husky"
   },
   "dependencies": {
     "@supabase/ssr": "^0.6.1",
