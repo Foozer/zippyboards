@@ -1,31 +1,37 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
-import Link from 'next/link'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/utils/supabase/client'
+import { supabase } from '@/lib/supabase/client'
+import Link from 'next/link'
 
-// Initialize the Supabase client outside the component
-const supabase = createClient()
-
-interface AppLayoutProps {
+export default function DashboardLayout({
+  children,
+}: {
   children: React.ReactNode
-}
-
-export default function AppLayout({ children }: AppLayoutProps) {
-  const router = useRouter()
-  const [isSigningOut, setIsSigningOut] = useState(false)
+}) {
   const [isLoading, setIsLoading] = useState(true)
+  const [user, setUser] = useState<any>(null)
+  const router = useRouter()
 
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const { data, error } = await supabase.auth.getUser()
-        if (error || !data?.user) {
-          router.push('/login')
+        const { data: { session }, error } = await supabase.auth.getSession()
+        
+        if (error) {
+          throw error
         }
+        
+        if (!session?.user) {
+          // If no session, redirect to login
+          router.push('/login')
+          return
+        }
+        
+        setUser(session.user)
       } catch (error) {
-        console.error('Error checking auth status:', error)
+        console.error('Error checking auth:', error)
         router.push('/login')
       } finally {
         setIsLoading(false)
@@ -33,25 +39,20 @@ export default function AppLayout({ children }: AppLayoutProps) {
     }
 
     checkAuth()
-  }, [router]) // Removed supabase from dependency array
+  }, [router])
 
   const handleSignOut = async () => {
     try {
-      setIsSigningOut(true)
-      const { error } = await supabase.auth.signOut()
-      if (error) throw error
+      await supabase.auth.signOut()
       router.push('/login')
-      router.refresh()
-    } catch (err) {
-      console.error('Error signing out:', err)
-    } finally {
-      setIsSigningOut(false)
+    } catch (error) {
+      console.error('Error signing out:', error)
     }
   }
 
   if (isLoading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-gray-900">
+      <div className="flex items-center justify-center min-h-screen bg-gray-900">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
       </div>
     )
@@ -64,7 +65,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
         <div className="mb-8">
           <h1 className="text-xl font-bold">ZippyBoards</h1>
         </div>
-        
+
         <nav className="space-y-8">
           <ul className="space-y-2">
             <li>
@@ -80,18 +81,18 @@ export default function AppLayout({ children }: AppLayoutProps) {
             </li>
             <li>
               <Link
-                href="/app"
+                href="/dashboard/projects"
                 className="flex items-center gap-2 p-2 rounded hover:bg-gray-700"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                 </svg>
-                App
+                Projects
               </Link>
             </li>
             <li>
               <Link
-                href="/settings"
+                href="/dashboard/settings"
                 className="flex items-center gap-2 p-2 rounded hover:bg-gray-700"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -103,24 +104,29 @@ export default function AppLayout({ children }: AppLayoutProps) {
             </li>
           </ul>
 
-          {/* Sign Out Button */}
+          {/* User info and sign out */}
           <div className="pt-4 border-t border-gray-700">
+            {user && (
+              <div className="mb-4 text-sm">
+                <div className="text-gray-400">Signed in as:</div>
+                <div className="truncate text-gray-300">{user.email}</div>
+              </div>
+            )}
             <button
               onClick={handleSignOut}
-              disabled={isSigningOut}
               className="flex items-center gap-2 w-full p-2 rounded hover:bg-red-600/20 text-red-400 hover:text-red-300 transition-colors"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
               </svg>
-              {isSigningOut ? 'Signing out...' : 'Sign Out'}
+              Sign Out
             </button>
           </div>
         </nav>
       </aside>
 
       {/* Main content */}
-      <main className="flex-1 overflow-hidden">
+      <main className="flex-1 overflow-auto p-6">
         {children}
       </main>
     </div>
