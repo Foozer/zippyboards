@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase/client'
+import type { User } from '@supabase/supabase-js'
 
 export default function DashboardPage() {
-  const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
@@ -37,7 +38,7 @@ export default function DashboardPage() {
         <div className="bg-gray-800 rounded-lg p-6">
           <h2 className="text-xl font-semibold mb-4">Getting Started</h2>
           <p className="text-gray-300 mb-4">
-            Welcome {user.email}! You're now ready to start managing your projects and tasks.
+            Welcome {user.email}! You&apos;re now ready to start managing your projects and tasks.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="p-4 bg-gray-700 rounded-lg">

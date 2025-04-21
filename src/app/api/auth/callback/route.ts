@@ -1,6 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { cookies } from 'next/headers'
+import type { CookieOptions } from '@supabase/ssr'
 
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url)
@@ -8,7 +9,7 @@ export async function GET(request: NextRequest) {
   const redirect = requestUrl.searchParams.get('redirectedFrom') || '/dashboard'
 
   if (code) {
-    const cookieStore = cookies()
+    const cookieStore = await cookies()
     
     // Create a Supabase client using cookies
     const supabase = createServerClient(
@@ -19,14 +20,17 @@ export async function GET(request: NextRequest) {
           get(name: string) {
             return cookieStore.get(name)?.value
           },
-          set(name: string, value: string, options: any) {
-            cookieStore.set(name, value, {
+          set(name: string, value: string, options: CookieOptions) {
+            cookieStore.set({
+              name,
+              value,
               ...options,
               path: '/',
             })
           },
-          remove(name: string, options: any) {
-            cookieStore.delete(name, {
+          remove(name: string, options: CookieOptions) {
+            cookieStore.delete({
+              name,
               ...options,
               path: '/',
             })

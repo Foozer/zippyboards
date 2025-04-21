@@ -71,7 +71,7 @@ export default function Home() {
                 <div className="text-red-500 text-sm">{error}</div>
               )}
               {isSuccess && (
-                <div className="text-green-500 text-sm">Thanks for joining our waitlist! We'll be in touch soon.</div>
+                <div className="text-green-500 text-sm">Thanks for joining our waitlist! We&apos;ll be in touch soon.</div>
               )}
               <button
                 type="submit"
