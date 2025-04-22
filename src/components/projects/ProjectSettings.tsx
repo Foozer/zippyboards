@@ -26,12 +26,12 @@ interface ProjectMemberData {
   email: string
 }
 
-interface ErrorDetails {
-  message?: string
-  details?: string
-  hint?: string
-  code?: string
-}
+// interface ErrorDetails {
+//   message?: string
+//   details?: string
+//   hint?: string
+//   code?: string
+// }
 
 export default function ProjectSettings({ project }: ProjectSettingsProps) {
   const [members, setMembers] = useState<ProjectMember[]>([])
