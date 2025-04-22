@@ -209,16 +209,21 @@ DROP POLICY IF EXISTS "Users can view their own membership entries" ON public.pr
 DROP POLICY IF EXISTS "Project owners can update project members" ON public.project_members;
 DROP POLICY IF EXISTS "Project owners can delete project members" ON public.project_members;
 
--- Re-instate the IN clause policy: Allow users to view all members of projects they are part of.
--- CREATE POLICY "Project members can view project members"
---    ON public.project_members FOR SELECT
---    USING (
---        project_members.project_id IN (
---            SELECT pm.project_id
---            FROM public.project_members pm
---            WHERE pm.user_id = auth.uid()
---        )
---    );
+-- Create the policy to allow project creators to insert themselves as owners
+CREATE POLICY "Project creators can insert initial owner"
+    ON public.project_members
+    FOR INSERT
+    WITH CHECK (
+        -- Allow if the user is inserting themselves as owner
+        (user_id = auth.uid() AND role = 'owner')
+        AND
+        -- And if they are the creator of the project
+        EXISTS (
+            SELECT 1 FROM public.projects
+            WHERE id = project_id
+            AND created_by = auth.uid()
+        )
+    );
 
 -- Simpler policy: Allow users to select their own membership entries directly.
 -- This avoids self-referencing subqueries in the policy itself and works for the dashboard.
