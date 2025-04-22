@@ -22,7 +22,7 @@ export function EditTaskForm({ task, onTaskUpdated, onCancel }: EditTaskFormProp
   const [priority, setPriority] = useState<'low' | 'medium' | 'high'>(task.priority)
   const [dueDate, setDueDate] = useState(task.due_date ? new Date(task.due_date).toISOString().split('T')[0] : '')
   const [assignedTo, setAssignedTo] = useState<string | null>(task.assigned_to)
-  const [status, setStatus] = useState<'todo' | 'in_progress' | 'done'>(task.status)
+  const [status, setStatus] = useState<'backlog' | 'in_progress' | 'done'>(task.status)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [projectMembers, setProjectMembers] = useState<User[]>([])
@@ -131,10 +131,10 @@ export function EditTaskForm({ task, onTaskUpdated, onCancel }: EditTaskFormProp
           <select
             id="status"
             value={status}
-            onChange={(e) => setStatus(e.target.value as 'todo' | 'in_progress' | 'done')}
+            onChange={(e) => setStatus(e.target.value as 'backlog' | 'in_progress' | 'done')}
             className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            <option value="todo">To Do</option>
+            <option value="backlog">Backlog</option>
             <option value="in_progress">In Progress</option>
             <option value="done">Done</option>
           </select>
