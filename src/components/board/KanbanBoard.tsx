@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd'
 import { supabase } from '@/lib/supabase/client'
 import { Database } from '@/types/database'
@@ -23,6 +23,9 @@ interface Column {
 interface KanbanBoardProps {
   projectId: string
 }
+
+type SortOption = 'created_at' | 'due_date' | 'priority' | 'title'
+type FilterOption = 'all' | 'assigned' | 'unassigned' | 'overdue'
 
 export default function KanbanBoard({ projectId }: KanbanBoardProps) {
   const [columns, setColumns] = useState<Column[]>([
@@ -47,6 +50,9 @@ export default function KanbanBoard({ projectId }: KanbanBoardProps) {
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [editingTask, setEditingTask] = useState<Task | null>(null)
   const [projectMembers, setProjectMembers] = useState<Record<string, User>>({})
+  const [sortBy, setSortBy] = useState<SortOption>('created_at')
+  const [filterBy, setFilterBy] = useState<FilterOption>('all')
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
 
   const fetchTasks = useCallback(async () => {
     try {
@@ -199,6 +205,55 @@ export default function KanbanBoard({ projectId }: KanbanBoardProps) {
     }
   }, [columns, fetchTasks])
 
+  // Add filtered and sorted tasks
+  const filteredAndSortedColumns = useMemo(() => {
+    return columns.map(column => {
+      let filteredTasks = column.tasks
+
+      // Apply filters
+      if (filterBy === 'assigned') {
+        filteredTasks = filteredTasks.filter(task => task.assigned_to !== null)
+      } else if (filterBy === 'unassigned') {
+        filteredTasks = filteredTasks.filter(task => task.assigned_to === null)
+      } else if (filterBy === 'overdue') {
+        const today = new Date()
+        filteredTasks = filteredTasks.filter(task => 
+          task.due_date && new Date(task.due_date) < today
+        )
+      }
+
+      // Apply sorting
+      filteredTasks = [...filteredTasks].sort((a, b) => {
+        if (sortBy === 'priority') {
+          const priorityOrder = { high: 3, medium: 2, low: 1 }
+          return sortDirection === 'desc' 
+            ? priorityOrder[b.priority] - priorityOrder[a.priority]
+            : priorityOrder[a.priority] - priorityOrder[b.priority]
+        } else if (sortBy === 'due_date') {
+          if (!a.due_date) return 1
+          if (!b.due_date) return -1
+          return sortDirection === 'desc'
+            ? new Date(b.due_date).getTime() - new Date(a.due_date).getTime()
+            : new Date(a.due_date).getTime() - new Date(b.due_date).getTime()
+        } else if (sortBy === 'title') {
+          return sortDirection === 'desc'
+            ? b.title.localeCompare(a.title)
+            : a.title.localeCompare(b.title)
+        } else {
+          // Default to created_at
+          return sortDirection === 'desc'
+            ? new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+            : new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+        }
+      })
+
+      return {
+        ...column,
+        tasks: filteredTasks
+      }
+    })
+  }, [columns, sortBy, sortDirection, filterBy])
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -219,12 +274,48 @@ export default function KanbanBoard({ projectId }: KanbanBoardProps) {
     <div className="flex flex-col h-full">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold">Task Board</h2>
-        <button
-          onClick={() => setShowCreateForm(!showCreateForm)}
-          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md"
-        >
-          {showCreateForm ? 'Cancel' : 'Create Task'}
-        </button>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <label htmlFor="filter" className="text-sm text-gray-400">Filter:</label>
+            <select
+              id="filter"
+              value={filterBy}
+              onChange={(e) => setFilterBy(e.target.value as FilterOption)}
+              className="px-2 py-1 bg-gray-800 border border-gray-700 rounded-md text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="all">All Tasks</option>
+              <option value="assigned">Assigned</option>
+              <option value="unassigned">Unassigned</option>
+              <option value="overdue">Overdue</option>
+            </select>
+          </div>
+          <div className="flex items-center gap-2">
+            <label htmlFor="sort" className="text-sm text-gray-400">Sort by:</label>
+            <select
+              id="sort"
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as SortOption)}
+              className="px-2 py-1 bg-gray-800 border border-gray-700 rounded-md text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="created_at">Created Date</option>
+              <option value="due_date">Due Date</option>
+              <option value="priority">Priority</option>
+              <option value="title">Title</option>
+            </select>
+            <button
+              onClick={() => setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc')}
+              className="p-1 hover:bg-gray-700 rounded"
+            >
+              {sortDirection === 'asc' ? '↑' : '↓'}
+            </button>
+          </div>
+          <button
+            onClick={() => setShowCreateForm(!showCreateForm)}
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md"
+          >
+            {showCreateForm ? 'Cancel' : 'Create Task'}
+          </button>
+        </div>
       </div>
 
       {showCreateForm && (
@@ -255,7 +346,7 @@ export default function KanbanBoard({ projectId }: KanbanBoardProps) {
       >
         <div className="flex-1 min-h-0">
           <div className="flex gap-4 h-full">
-            {columns.map((column) => (
+            {filteredAndSortedColumns.map((column) => (
               <Droppable 
                 key={column.id} 
                 droppableId={column.id}
