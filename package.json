@@ -6,31 +6,38 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "prepare": "husky install"
+    "lint": "next lint --dir src",
+    "lint:fix": "next lint --dir src --fix",
+    "postinstall": "husky"
   },
   "dependencies": {
+    "@hello-pangea/dnd": "^18.0.1",
+    "@supabase/ssr": "^0.6.1",
     "@supabase/supabase-js": "^2.49.4",
+    "@types/react-beautiful-dnd": "^13.1.8",
     "next": "15.3.1",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
+    "@types/node": "^20.17.30",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "15.3.1",
+    "eslint-config-prettier": "^10.1.2",
     "husky": "^9.1.7",
     "lint-staged": "^15.5.1",
+    "prettier": "^3.5.3",
     "tailwindcss": "^4",
     "typescript": "^5"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
-      "next lint"
+      "next lint --fix --dir src",
+      "prettier --write"
     ]
   }
 }
