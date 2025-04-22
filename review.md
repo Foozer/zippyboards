@@ -40,11 +40,12 @@
 - ✅ Set up project permissions
 
 ### 3. Task Management
-- [ ] Implement task creation with all fields
-- [ ] Add task editing functionality
-- [ ] Set up task assignment
-- [ ] Implement task status updates
-- [ ] Add task filtering and sorting
+- ✅ Implement task creation with all fields
+- ✅ Add task editing functionality
+- ✅ Set up task assignment
+- ✅ Implement task status updates
+- ✅ Add task filtering and sorting
+- ✅ Add drag-and-drop for tasks
 
 ### 4. Email Integration
 - [ ] Set up email templates
@@ -57,7 +58,6 @@
 - [ ] Implement error boundaries
 - [ ] Add toast notifications
 - [ ] Improve mobile responsiveness
-- [ ] Add drag-and-drop for tasks
 
 ### 6. Testing & Quality Assurance
 - [ ] Set up testing environment
