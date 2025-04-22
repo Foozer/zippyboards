@@ -1,10 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { supabase } from '@/lib/supabase'
-import { Database } from '@/types/database'
-
-type Task = Database['public']['Tables']['tasks']['Row']
+import React, { useState } from 'react'
+import { supabase } from '@/lib/supabase/client'
 
 interface CreateTaskFormProps {
   projectId: string
@@ -16,50 +13,34 @@ export function CreateTaskForm({ projectId, onTaskCreated }: CreateTaskFormProps
   const [description, setDescription] = useState('')
   const [priority, setPriority] = useState<'low' | 'medium' | 'high'>('medium')
   const [dueDate, setDueDate] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setIsLoading(true)
+    setIsSubmitting(true)
     setError(null)
 
     try {
-      const { data: { user } } = await supabase.auth.getUser()
-      
-      if (!user) {
-        throw new Error('You must be logged in to create a task')
-      }
-
-      const { data: task, error: taskError } = await supabase
+      const { error } = await supabase
         .from('tasks')
-        .insert([
-          {
-            title,
-            description,
-            priority,
-            due_date: dueDate || null,
-            project_id: projectId,
-            created_by: user.id,
-            status: 'backlog'
-          }
-        ])
-        .select()
-        .single()
+        .insert({
+          title,
+          description,
+          status: 'backlog',
+          project_id: projectId,
+          priority,
+          due_date: dueDate || null
+        })
 
-      if (taskError) throw taskError
+      if (error) throw error
 
-      // Reset form
-      setTitle('')
-      setDescription('')
-      setPriority('medium')
-      setDueDate('')
       onTaskCreated()
     } catch (err) {
       console.error('Error creating task:', err)
       setError(err instanceof Error ? err.message : 'Failed to create task')
     } finally {
-      setIsLoading(false)
+      setIsSubmitting(false)
     }
   }
 
@@ -136,10 +117,10 @@ export function CreateTaskForm({ projectId, onTaskCreated }: CreateTaskFormProps
 
       <button
         type="submit"
-        disabled={isLoading}
+        disabled={isSubmitting}
         className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900 disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        {isLoading ? 'Creating...' : 'Create Task'}
+        {isSubmitting ? 'Creating...' : 'Create Task'}
       </button>
     </form>
   )

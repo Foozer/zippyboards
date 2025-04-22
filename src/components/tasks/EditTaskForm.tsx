@@ -1,10 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { supabase } from '@/lib/supabase'
+import React, { useState, useEffect } from 'react'
+import { supabase } from '@/lib/supabase/client'
 import { Database } from '@/types/database'
 
-type Task = Database['public']['Tables']['tasks']['Row']
 type User = {
   user_id: string
   email: string

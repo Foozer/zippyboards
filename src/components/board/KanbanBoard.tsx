@@ -118,53 +118,6 @@ export default function KanbanBoard({ projectId }: KanbanBoardProps) {
     })
   }, [columns])
 
-  const handleTaskStatusUpdate = async (taskId: string, newStatus: Task['status']) => {
-    try {
-      const { error } = await supabase
-        .from('tasks')
-        .update({ status: newStatus })
-        .eq('id', taskId)
-
-      if (error) throw error
-
-      // Update local state
-      setColumns(prevColumns => {
-        // Find the task in the current columns
-        const task = prevColumns
-          .flatMap(col => col.tasks)
-          .find(t => t.id === taskId)
-        
-        if (!task) return prevColumns
-
-        // Create a new task with updated status
-        const updatedTask = { ...task, status: newStatus }
-
-        // Update all columns
-        return prevColumns.map(column => {
-          if (column.id === newStatus) {
-            // Add to new column if not already there
-            if (!column.tasks.some(t => t.id === taskId)) {
-              return {
-                ...column,
-                tasks: [...column.tasks, updatedTask]
-              }
-            }
-          } else {
-            // Remove from other columns
-            return {
-              ...column,
-              tasks: column.tasks.filter(t => t.id !== taskId)
-            }
-          }
-          return column
-        })
-      })
-    } catch (err) {
-      console.error('Error updating task status:', err)
-      setError(err instanceof Error ? err.message : 'Failed to update task status')
-    }
-  }
-
   const handleTaskCreated = () => {
     setShowCreateForm(false)
     fetchTasks()
@@ -175,28 +128,9 @@ export default function KanbanBoard({ projectId }: KanbanBoardProps) {
     fetchTasks()
   }
 
-  const handleTaskDeleted = async (taskId: string) => {
-    try {
-      const { error } = await supabase
-        .from('tasks')
-        .delete()
-        .eq('id', taskId)
-
-      if (error) throw error
-      fetchTasks()
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to delete task')
-    }
-  }
-
   const onDragStart = useCallback(() => {
     // Add a class to the body to prevent text selection during drag
     document.body.classList.add('dragging')
-  }, [])
-
-  const onDragEnd = useCallback(() => {
-    // Remove the class when drag ends
-    document.body.classList.remove('dragging')
   }, [])
 
   const handleDragEnd = useCallback(async (result: DropResult) => {
@@ -263,7 +197,7 @@ export default function KanbanBoard({ projectId }: KanbanBoardProps) {
       console.error('Error updating task status:', err)
       fetchTasks() // Re-fetch to sync with server state
     }
-  }, [columns])
+  }, [columns, fetchTasks])
 
   if (isLoading) {
     return (
