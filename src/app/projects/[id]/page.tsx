@@ -7,6 +7,7 @@ import { Database } from '@/types/database'
 import ProjectSettings from '@/components/projects/ProjectSettings'
 import AppLayout from '@/components/layout/AppLayout'
 import Link from 'next/link'
+import KanbanBoard from '@/components/board/KanbanBoard'
 
 type Project = Database['public']['Tables']['projects']['Row']
 
@@ -114,9 +115,7 @@ export default function ProjectPage() {
         </div>
 
         {activeTab === 'board' ? (
-          <div className="bg-gray-800 rounded-lg p-6">
-            <p className="text-gray-400">Kanban board will be implemented here</p>
-          </div>
+          <KanbanBoard projectId={project.id} />
         ) : (
           <ProjectSettings project={project} />
         )}
