@@ -82,6 +82,34 @@ CREATE TABLE public.github_sync (
     UNIQUE(project_id, github_repo_id)
 );
 
+-- Create failed_waitlist_submissions table
+DROP TABLE IF EXISTS public.failed_waitlist_submissions CASCADE;
+CREATE TABLE public.failed_waitlist_submissions (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    email VARCHAR(255),
+    reason VARCHAR(255) NOT NULL,
+    ip_address VARCHAR(45), -- IPv6 addresses can be up to 45 characters
+    user_agent TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Enable RLS on failed_waitlist_submissions
+ALTER TABLE public.failed_waitlist_submissions ENABLE ROW LEVEL SECURITY;
+
+-- Create policies for failed_waitlist_submissions
+DROP POLICY IF EXISTS "Anyone can insert failed submissions" ON public.failed_waitlist_submissions;
+DROP POLICY IF EXISTS "Only authenticated users can view failed submissions" ON public.failed_waitlist_submissions;
+
+CREATE POLICY "Anyone can insert failed submissions"
+    ON public.failed_waitlist_submissions
+    FOR INSERT
+    WITH CHECK (true); -- Allow anyone to insert
+
+CREATE POLICY "Only authenticated users can view failed submissions"
+    ON public.failed_waitlist_submissions
+    FOR SELECT
+    USING (auth.role() = 'authenticated'); -- Only authenticated users can view
+
 -- Create indexes
 CREATE INDEX IF NOT EXISTS idx_tasks_project_id ON public.tasks(project_id);
 CREATE INDEX IF NOT EXISTS idx_tasks_status ON public.tasks(status);
