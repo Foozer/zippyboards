@@ -8,6 +8,7 @@ export default function Home() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
   const [error, setError] = useState('')
+  const [lastSubmissionTime, setLastSubmissionTime] = useState<number | null>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -16,6 +17,55 @@ export default function Home() {
     setIsSubmitting(true)
 
     try {
+      // Get form data
+      const formData = new FormData(e.target as HTMLFormElement)
+      const honeypot = formData.get('website') as string
+      
+      // Check honeypot field
+      if (honeypot) {
+        // Log the failed submission
+        await supabase
+          .from('failed_waitlist_submissions')
+          .insert([{
+            email,
+            reason: 'Honeypot field filled',
+            ip_address: '', // This would need to be passed from the server
+            user_agent: navigator.userAgent
+          }])
+        throw new Error('Invalid submission')
+      }
+
+      // Check for rapid submissions (less than 5 seconds apart)
+      const now = Date.now()
+      if (lastSubmissionTime && now - lastSubmissionTime < 5000) {
+        // Log the failed submission
+        await supabase
+          .from('failed_waitlist_submissions')
+          .insert([{
+            email,
+            reason: 'Rapid submission attempt',
+            ip_address: '', // This would need to be passed from the server
+            user_agent: navigator.userAgent
+          }])
+        throw new Error('Please wait a few seconds before submitting again')
+      }
+      setLastSubmissionTime(now)
+
+      // Basic email validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+      if (!emailRegex.test(email)) {
+        // Log the failed submission
+        await supabase
+          .from('failed_waitlist_submissions')
+          .insert([{
+            email,
+            reason: 'Invalid email format',
+            ip_address: '', // This would need to be passed from the server
+            user_agent: navigator.userAgent
+          }])
+        throw new Error('Please enter a valid email address')
+      }
+
       const { error: supabaseError } = await supabase
         .from('waitlist')
         .insert([{ 
@@ -26,8 +76,26 @@ export default function Home() {
       if (supabaseError) {
         console.error('Supabase error:', supabaseError)
         if (supabaseError.code === '23505') {
+          // Log the failed submission
+          await supabase
+            .from('failed_waitlist_submissions')
+            .insert([{
+              email,
+              reason: 'Email already exists',
+              ip_address: '', // This would need to be passed from the server
+              user_agent: navigator.userAgent
+            }])
           throw new Error('This email is already on our waitlist!')
         }
+        // Log other database errors
+        await supabase
+          .from('failed_waitlist_submissions')
+          .insert([{
+            email,
+            reason: `Database error: ${supabaseError.message}`,
+            ip_address: '', // This would need to be passed from the server
+            user_agent: navigator.userAgent
+          }])
         throw new Error(supabaseError.message)
       }
       setIsSuccess(true)
@@ -65,6 +133,15 @@ export default function Home() {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   className="w-full px-4 py-2 rounded bg-gray-700 border border-gray-600 text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              {/* Honeypot field - hidden from humans but visible to bots */}
+              <div className="hidden">
+                <input
+                  type="text"
+                  name="website"
+                  tabIndex={-1}
+                  autoComplete="off"
                 />
               </div>
               {error && (
