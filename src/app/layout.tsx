@@ -14,27 +14,27 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'),
-  title: "ZippyBoard - Speed-run Issue Tracker",
+  title: "ZippyBoards - Speed-run Issue Tracker",
   description: "The speed-run issue tracker for indie devs and lean teams. Lightning fast, GitHub integrated, and AI-powered task management.",
   keywords: ["issue tracker", "project management", "kanban", "github integration", "ai", "task management"],
-  authors: [{ name: "ZippyBoard Team" }],
+  authors: [{ name: "ZippyBoards Team" }],
   openGraph: {
-    title: "ZippyBoard - Speed-run Issue Tracker",
+    title: "ZippyBoards - Speed-run Issue Tracker",
     description: "The speed-run issue tracker for indie devs and lean teams. Lightning fast, GitHub integrated, and AI-powered task management.",
     type: "website",
-    url: "https://zippyboard.com",
+    url: "https://zippyboards.com",
     images: [
       {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "ZippyBoard - Speed-run Issue Tracker",
+        alt: "ZippyBoards - Speed-run Issue Tracker",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "ZippyBoard - Speed-run Issue Tracker",
+    title: "ZippyBoards - Speed-run Issue Tracker",
     description: "The speed-run issue tracker for indie devs and lean teams. Lightning fast, GitHub integrated, and AI-powered task management.",
     images: ["/og-image.png"],
   },

@@ -115,7 +115,7 @@ export default function Home() {
       <div className="container mx-auto px-4 py-20">
         <div className="max-w-3xl mx-auto text-center">
           <h1 className="text-4xl md:text-6xl font-bold mb-6">
-            <span className="text-blue-500">Zippy</span>Board
+            <span className="text-blue-500">Zippy</span>Boards
           </h1>
           <p className="text-xl md:text-2xl mb-8 text-gray-300">
             The speed-run issue tracker for indie devs and lean teams
@@ -165,7 +165,7 @@ export default function Home() {
       {/* Features Section */}
       <div className="bg-gray-800 py-20">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12">Why Choose ZippyBoard?</h2>
+          <h2 className="text-3xl font-bold text-center mb-12">Why Choose ZippyBoards?</h2>
           <div className="grid md:grid-cols-3 gap-8">
             <div className="bg-gray-700 p-6 rounded-lg">
               <div className="text-blue-500 text-3xl mb-4">⚡</div>
